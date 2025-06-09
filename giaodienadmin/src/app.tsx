@@ -1,128 +1,88 @@
-import Footer from '@/components/Footer';
+import { PageLoading } from '@ant-design/pro-layout';
+import { history, Link } from 'umi';
 import RightContent from '@/components/RightContent';
-import { notification } from 'antd';
-import 'moment/locale/vi';
-import type { RequestConfig, RunTimeLayoutConfig } from 'umi';
-import { getIntl, getLocale, history } from 'umi';
-import type { RequestOptionsInit, ResponseError } from 'umi-request';
-import ErrorBoundary from './components/ErrorBoundary';
-// import LoadingPage from './components/Loading';
-import { OIDCBounder } from './components/OIDCBounder';
-import { unCheckPermissionPaths } from './components/OIDCBounder/constant';
-import OneSignalBounder from './components/OneSignalBounder';
-import TechnicalSupportBounder from './components/TechnicalSupportBounder';
-import NotAccessible from './pages/exception/403';
-import NotFoundContent from './pages/exception/404';
-import type { IInitialState } from './services/base/typing';
-import './styles/global.less';
-import { currentRole } from './utils/ip';
+import Footer from '@/components/Footer';
+import { currentUser as queryCurrentUser } from './services/user';
+import { BookOutlined, LinkOutlined } from '@ant-design/icons';
+import defaultSettings from '../config/defaultSettings';
 
-/**  loading */
+const isDev = process.env.NODE_ENV === 'development';
+const loginPath = '/user/login';
+
+/** 获取用户信息比较慢的时候会展示一个 loading */
 export const initialStateConfig = {
-	loading: <></>,
+  loading: <PageLoading />,
 };
 
 /**
  * @see  https://umijs.org/zh-CN/plugins/plugin-initial-state
- * // Tobe removed
  * */
-export async function getInitialState(): Promise<IInitialState> {
-	return {
-		permissionLoading: true,
-	};
+export async function getInitialState(): Promise<{
+  settings?: Partial<ProSettings>;
+  currentUser?: API.CurrentUser;
+  loading?: boolean;
+  fetchUserInfo?: () => Promise<API.CurrentUser | undefined>;
+}> {
+  const fetchUserInfo = async () => {
+    try {
+      const msg = await queryCurrentUser();
+      return msg.data;
+    } catch (error) {
+      history.push(loginPath);
+    }
+    return undefined;
+  };
+  // 如果不是登录页面，执行
+  if (history.location.pathname !== loginPath) {
+    const currentUser = await fetchUserInfo();
+    return {
+      fetchUserInfo,
+      currentUser,
+      settings: defaultSettings,
+    };
+  }
+  return {
+    fetchUserInfo,
+    settings: defaultSettings,
+  };
 }
 
-// Tobe removed
-const authHeaderInterceptor = (url: string, options: RequestOptionsInit) => ({});
-
-/**
- * @see https://beta-pro.ant.design/docs/request-cn
- */
-export const request: RequestConfig = {
-	errorHandler: (error: ResponseError) => {
-		const { messages } = getIntl(getLocale());
-		const { response } = error;
-
-		if (response && response.status) {
-			const { status, statusText, url } = response;
-			const requestErrorMessage = messages['app.request.error'];
-			const errorMessage = `${requestErrorMessage} ${status}: ${url}`;
-			const errorDescription = messages[`app.request.${status}`] || statusText;
-			notification.error({
-				message: errorMessage,
-				description: errorDescription,
-			});
-		}
-
-		if (!response) {
-			notification.error({
-				description: 'Yêu cầu gặp lỗi',
-				message: 'Bạn hãy thử lại sau',
-			});
-		}
-		throw error;
-	},
-	requestInterceptors: [authHeaderInterceptor],
-};
-
-// ProLayout  https://procomponents.ant.design/components/layout
-export const layout: RunTimeLayoutConfig = ({ initialState }) => {
-	return {
-		unAccessible: (
-			<OIDCBounder>
-				<TechnicalSupportBounder>
-					<NotAccessible />
-				</TechnicalSupportBounder>
-			</OIDCBounder>
-		),
-		noFound: <NotFoundContent />,
-		rightContentRender: () => <RightContent />,
-		disableContentMargin: false,
-
-		footerRender: () => <Footer />,
-
-		onPageChange: () => {
-			if (initialState?.currentUser) {
-				const { location } = history;
-				const isUncheckPath = unCheckPermissionPaths.some((path) => window.location.pathname.includes(path));
-
-				if (location.pathname === '/') {
-					history.replace('/dashboard');
-				} else if (
-					!isUncheckPath &&
-					currentRole &&
-					initialState?.authorizedPermissions?.length &&
-					!initialState?.authorizedPermissions?.find((item) => item.rsname === currentRole)
-				)
-					history.replace('/403');
-			}
-		},
-
-		menuItemRender: (item: any, dom: any) => (
-			<a
-				className='not-underline'
-				key={item?.path}
-				href={item?.path}
-				onClick={(e) => {
-					e.preventDefault();
-					history.push(item?.path ?? '/');
-				}}
-				style={{ display: 'block' }}
-			>
-				{dom}
-			</a>
-		),
-
-		childrenRender: (dom) => (
-			<OIDCBounder>
-				<ErrorBoundary>
-					{/* <TechnicalSupportBounder> */}
-					<OneSignalBounder>{dom}</OneSignalBounder>
-					{/* </TechnicalSupportBounder> */}
-				</ErrorBoundary>
-			</OIDCBounder>
-		),
-		menuHeaderRender: undefined,
-		...initialState?.settings,
-	};
+// ProLayout 支持的api https://procomponents.ant.design/components/layout
+export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) => {
+  return {
+    rightContentRender: () => <RightContent />,
+    disableContentMargin: false,
+    waterMarkProps: {
+      content: initialState?.currentUser?.name,
+    },
+    footerRender: () => <Footer />,
+    onPageChange: () => {
+      const { location } = history;
+      // 如果没有登录，重定向到 login
+      if (!initialState?.currentUser && location.pathname !== loginPath) {
+        history.push(loginPath);
+      }
+    },
+    links: isDev
+      ? [
+          <Link key="openapi" to="/umi/plugin/openapi" target="_blank">
+            <LinkOutlined />
+            <span>OpenAPI 文档</span>
+          </Link>,
+          <Link to="/~docs" key="docs">
+            <BookOutlined />
+            <span>业务组件文档</span>
+          </Link>,
+        ]
+      : [],
+    menuHeaderRender: undefined,
+    // 自定义 403 页面
+    // unAccessible: <div>unAccessible</div>,
+    // 增加一个 loading 的状态
+    childrenRender: (children, props) => {
+      // if (initialState?.loading) return <PageLoading />;
+      return <>{children}</>;
+    },
+    ...initialState?.settings,
+  };
 };

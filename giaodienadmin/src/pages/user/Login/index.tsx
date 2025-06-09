@@ -1,195 +1,156 @@
-import Footer from '@/components/Footer';
-import LoginWithKeycloak from '@/pages/user/Login/KeycloakLogin';
-import { adminlogin, getUserInfo } from '@/services/base/api';
-import { keycloakAuthority } from '@/utils/ip';
-import rules from '@/utils/rules';
-import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import { Button, Form, Input, Tabs, message } from 'antd';
+import { Alert, message } from 'antd';
 import React, { useState } from 'react';
-// import Recaptcha from 'react-recaptcha';
-import { history, useIntl, useModel } from 'umi';
+import { ProFormText, LoginForm } from '@ant-design/pro-form';
+import { useIntl, history, FormattedMessage, SelectLang, useModel } from 'umi';
+import Footer from '@/components/Footer';
+import { login } from '@/services/user';
+import { LockOutlined, UserOutlined } from '@ant-design/icons';
+
 import styles from './index.less';
 
+const LoginMessage: React.FC<{
+  content: string;
+}> = ({ content }) => (
+  <Alert
+    style={{
+      marginBottom: 24,
+    }}
+    message={content}
+    type="error"
+    showIcon
+  />
+);
+
 const Login: React.FC = () => {
-	const [count, setCount] = useState<number>(Number(localStorage?.getItem('failed')) || 0);
-	const [submitting, setSubmitting] = useState(false);
-	const [type, setType] = useState<string>('account');
-	const { initialState, setInitialState } = useModel('@@initialState');
-	const [isVerified, setIsverified] = useState<boolean>(true);
-	const [visibleCaptcha, setVisibleCaptcha] = useState<boolean>(false);
-	// const [visibleCaptcha2, setVisibleCaptcha2] = useState<boolean>(false);
-	// const recaptchaRef = useRef(null);
-	const intl = useIntl();
-	const [form] = Form.useForm();
+  const [userLoginState, setUserLoginState] = useState<API.LoginResult>({});
+  const [submitting, setSubmitting] = useState(false);
+  const { initialState, setInitialState } = useModel('@@initialState');
 
-	/**
-	 * Xử lý token, get info sau khi đăng nhập
-	 */
-	const handleRole = async (role: { access_token: string; refresh_token: string }) => {
-		// Tobe removed
-		localStorage.setItem('token', role?.access_token);
-		localStorage.setItem('refreshToken', role?.refresh_token);
+  const intl = useIntl();
 
-		// const decoded = jwt_decode(role?.access_token) as any;
-		const info = await getUserInfo();
-		setInitialState({
-			...initialState,
-			currentUser: info?.data?.data,
-			// authorizedPermissions: decoded?.authorization?.permissions,
-		});
+  const fetchUserInfo = async () => {
+    const userInfo = await initialState?.fetchUserInfo?.();
+    if (userInfo) {
+      await setInitialState((s) => ({
+        ...s,
+        currentUser: userInfo,
+      }));
+    }
+  };
 
-		const defaultloginSuccessMessage = intl.formatMessage({
-			id: 'pages.login.success',
-			defaultMessage: 'success',
-		});
-		message.success(defaultloginSuccessMessage);
-		history.push('/dashboard');
-	};
+  const handleSubmit = async (values: API.LoginParams) => {
+    setSubmitting(true);
+    try {
+      // 登录
+      const msg = await login({ ...values, type: 'admin' });
+      if (msg.status === 'ok') {
+        const defaultLoginSuccessMessage = intl.formatMessage({
+          id: 'pages.login.success',
+          defaultMessage: '登录成功！',
+        });
+        message.success(defaultLoginSuccessMessage);
 
-	const handleSubmit = async (values: { login: string; password: string }) => {
-		try {
-			if (!isVerified) {
-				message.error('Vui lòng xác thực Captcha');
-				return;
-			}
-			setSubmitting(true);
-			const msg = await adminlogin({ ...values, username: values?.login ?? '' });
-			if (msg.status === 200 && msg?.data?.data?.accessToken) {
-				handleRole(msg?.data?.data);
-				localStorage.removeItem('failed');
-			}
-		} catch (error) {
-			if (count >= 4) {
-				setIsverified(false);
-				setVisibleCaptcha(!visibleCaptcha);
-				// setVisibleCaptcha2(true);
-			}
-			setCount(count + 1);
-			localStorage.setItem('failed', (count + 1).toString());
-			const defaultloginFailureMessage = intl.formatMessage({
-				id: 'pages.login.failure',
-				defaultMessage: 'failure',
-			});
-			message.error(defaultloginFailureMessage);
-		}
-		setSubmitting(false);
-	};
+        // 保存token到localStorage
+        if (msg.data?.token) {
+          localStorage.setItem('token', msg.data.token);
+        }
 
-	// const verifyCallback = (response: any) => {
-	// 	if (response) setIsverified(true);
-	// 	else setIsverified(false);
-	// };
+        await fetchUserInfo();
+        /** 此方法会跳转到 redirect 参数所在的位置 */
+        if (!history) return;
+        const { query } = history.location;
+        const { redirect } = query as { redirect: string };
+        history.push(redirect || '/');
+        return;
+      }
+      // 如果失败去设置用户错误信息
+      setUserLoginState(msg);
+    } catch (error) {
+      const defaultLoginFailureMessage = intl.formatMessage({
+        id: 'pages.login.failure',
+        defaultMessage: '登录失败，请重试！',
+      });
+      message.error(defaultLoginFailureMessage);
+    }
+    setSubmitting(false);
+  };
+  const { status, type: loginType } = userLoginState;
 
-	return (
-		<div className={styles.container}>
-			<div className={styles.content}>
-				<div className={styles.top}>
-					<div className={styles.header}>
-						<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-							<img alt='logo' className={styles.logo} src='/logo-full.svg' />
-						</div>
-					</div>
-				</div>
-
-				<div className={styles.main}>
-					<Tabs activeKey={type} onChange={setType}>
-						<Tabs.TabPane
-							key='account'
-							tab={intl.formatMessage({
-								id: 'pages.login.accountLogin.tab',
-								defaultMessage: 'tab',
-							})}
-						/>
-						{/* <Tabs.TabPane
-              key="accountAdmin"
-              tab={intl.formatMessage({
-                id: 'pages.login.accountLoginAdmin.tab',
-                defaultMessage: 'tab',
+  return (
+    <div className={styles.container}>
+      <div className={styles.lang} data-lang>
+        {SelectLang && <SelectLang />}
+      </div>
+      <div className={styles.content}>
+        <LoginForm
+          logo={<img alt="logo" src="/logo.png" />}
+          title="Admin Panel"
+          subTitle={intl.formatMessage({ id: 'pages.layouts.userLayout.title' })}
+          initialValues={{
+            autoLogin: true,
+          }}
+          onFinish={async (values) => {
+            await handleSubmit(values as API.LoginParams);
+          }}
+        >
+          {status === 'error' && loginType === 'admin' && (
+            <LoginMessage
+              content={intl.formatMessage({
+                id: 'pages.login.accountLogin.errorMessage',
+                defaultMessage: '账户或密码错误',
               })}
-            /> */}
-					</Tabs>
+            />
+          )}
 
-					{type === 'account' ? (
-						<LoginWithKeycloak />
-					) : type === 'accountAdmin' ? (
-						<Form
-							form={form}
-							onFinish={async (values) => handleSubmit(values as { login: string; password: string })}
-							layout='vertical'
-						>
-							<Form.Item label='' name='login' rules={[...rules.required]}>
-								<Input
-									placeholder={intl.formatMessage({
-										id: 'pages.login.username.placeholder',
-										defaultMessage: 'Nhập tên đăng nhập',
-									})}
-									prefix={<UserOutlined className={styles.prefixIcon} />}
-									size='large'
-								/>
-							</Form.Item>
-							<Form.Item label='' name='password' rules={[...rules.required]}>
-								<Input.Password
-									placeholder={intl.formatMessage({
-										id: 'pages.login.password.placeholder',
-										defaultMessage: 'Nhập mật khẩu',
-									})}
-									prefix={<LockOutlined className={styles.prefixIcon} />}
-									size='large'
-								/>
-							</Form.Item>
-
-							<Button type='primary' block size='large' loading={submitting}>
-								{intl.formatMessage({
-									id: 'pages.login.submit',
-									defaultMessage: 'submit',
-								})}
-							</Button>
-						</Form>
-					) : null}
-
-					<br />
-					<div style={{ textAlign: 'center' }}>
-						<Button
-							onClick={() => {
-								window.open(keycloakAuthority + '/login-actions/reset-credentials');
-							}}
-							type='link'
-						>
-							Quên mật khẩu?
-						</Button>
-
-						{/* {type === 'accountAdmin' && visibleCaptcha && count >= 5 && (
-              <Recaptcha
-                ref={recaptchaRef}
-                size="normal"
-                sitekey="6LelHsEeAAAAAJmsVdeC2EPNCAVEtfRBUGSKireh"
-                render="explicit"
-                hl="vi"
-                // onloadCallback={callback}
-                verifyCallback={verifyCallback}
-              />
-            )}
-
-            {type === 'accountAdmin' && !visibleCaptcha && visibleCaptcha2 && count >= 5 && (
-              <Recaptcha
-                ref={recaptchaRef}
-                size="normal"
-                sitekey="6LelHsEeAAAAAJmsVdeC2EPNCAVEtfRBUGSKireh"
-                render="explicit"
-                hl="vi"
-                // onloadCallback={callback}
-                verifyCallback={verifyCallback}
-              />
-            )} */}
-					</div>
-				</div>
-			</div>
-
-			<div className='login-footer'>
-				<Footer />
-			</div>
-		</div>
-	);
+          <ProFormText
+            name="username"
+            fieldProps={{
+              size: 'large',
+              prefix: <UserOutlined className={styles.prefixIcon} />,
+            }}
+            placeholder={intl.formatMessage({
+              id: 'pages.login.username.placeholder',
+              defaultMessage: '用户名',
+            })}
+            rules={[
+              {
+                required: true,
+                message: (
+                  <FormattedMessage
+                    id="pages.login.username.required"
+                    defaultMessage="请输入用户名!"
+                  />
+                ),
+              },
+            ]}
+          />
+          <ProFormText.Password
+            name="password"
+            fieldProps={{
+              size: 'large',
+              prefix: <LockOutlined className={styles.prefixIcon} />,
+            }}
+            placeholder={intl.formatMessage({
+              id: 'pages.login.password.placeholder',
+              defaultMessage: '密码',
+            })}
+            rules={[
+              {
+                required: true,
+                message: (
+                  <FormattedMessage
+                    id="pages.login.password.required"
+                    defaultMessage="请输入密码！"
+                  />
+                ),
+              },
+            ]}
+          />
+        </LoginForm>
+      </div>
+      <Footer />
+    </div>
+  );
 };
 
 export default Login;
