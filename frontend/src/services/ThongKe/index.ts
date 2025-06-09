@@ -48,3 +48,29 @@ export async function getThongKeMuonTheoThang(params: { month: string }) {
 
   return Promise.resolve({ data: chartData });
 }
+import axios from '@/utils/axios';
+
+/**
+ * [Admin] Lấy thống kê tổng quan cho dashboard
+ */
+export async function getDashboardStats() {
+  return axios.get('/api/v1/admin/statistics/dashboard').then((res) => res.data);
+}
+
+/**
+ * [Admin] Lấy thống kê thiết bị theo loại
+ */
+export async function getDeviceTypeStats() {
+  return axios.get('/api/v1/admin/statistics/device-types').then((res) => res.data);
+}
+
+/**
+ * [Admin] Lấy thống kê theo thời gian
+ */
+export async function getTimeRangeStats(params: {
+  startDate?: string;
+  endDate?: string;
+  type?: 'day' | 'week' | 'month';
+}) {
+  return axios.get('/api/v1/admin/statistics/time-range', { params }).then((res) => res.data);
+}

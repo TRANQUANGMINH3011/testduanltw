@@ -1,35 +1,48 @@
+
 import axios from '@/utils/axios';
 
-const API_URL = '/api/v1';
-
-// ================= API CHO ADMIN =================
-
 /**
- * [Admin] Lấy danh sách tất cả yêu cầu mượn
+ * [Admin] Lấy danh sách yêu cầu mượn thiết bị
  */
-export async function getYeuCau(params: any) {
-  return axios.get(`${API_URL}/admin/borrow-requests`, { params }).then((res) => res.data);
+export async function getYeuCau(params: {
+  current?: number;
+  pageSize?: number;
+  status?: string;
+}) {
+  return axios.get('/api/v1/admin/borrow-requests', { params }).then((res) => res.data);
 }
 
 /**
- * [Admin] Phê duyệt một yêu cầu mượn
+ * [Admin] Phê duyệt yêu cầu mượn thiết bị
  */
-export async function duyetYeuCau(id: string) {
-  return axios.patch(`${API_URL}/admin/borrow-requests/${id}/approve`);
+export async function approveYeuCau(id: string, data?: any) {
+  return axios.put(`/api/v1/admin/borrow-requests/${id}/approve`, data);
 }
 
 /**
- * [Admin] Từ chối một yêu cầu mượn
+ * [Admin] Từ chối yêu cầu mượn thiết bị
  */
-export async function tuChoiYeuCau(id: string) {
-  return axios.patch(`${API_URL}/admin/borrow-requests/${id}/reject`);
+export async function rejectYeuCau(id: string, data?: any) {
+  return axios.put(`/api/v1/admin/borrow-requests/${id}/reject`, data);
 }
 
-// ================= API CHO USER =================
+/**
+ * [Admin] Xác nhận đã lấy thiết bị
+ */
+export async function confirmPickup(id: string) {
+  return axios.put(`/api/v1/admin/borrow-requests/${id}/pickup`);
+}
 
 /**
- * [User] Tạo một yêu cầu mượn mới
+ * [Admin] Xác nhận đã trả thiết bị
  */
-export async function addYeuCau(data: { device: string; borrowDate: Date; returnDate: Date }) {
-  return axios.post(`${API_URL}/borrow-requests`, data);
+export async function confirmReturn(id: string) {
+  return axios.put(`/api/v1/admin/borrow-requests/${id}/return`);
+}
+
+/**
+ * [Admin] Lấy chi tiết yêu cầu
+ */
+export async function getYeuCauDetail(id: string) {
+  return axios.get(`/api/v1/admin/borrow-requests/${id}`).then((res) => res.data);
 }
