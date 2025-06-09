@@ -1,4 +1,3 @@
-
 export default [
   {
     path: '/user',
@@ -36,6 +35,12 @@ export default [
     name: 'dashboard',
     icon: 'dashboard',
     component: './Dashboard',
+  },
+  {
+    path: '/device-management',
+    name: 'device-management',
+    icon: 'laptop',
+    component: './DeviceManagement',
   },
   {
     path: '/devices',
