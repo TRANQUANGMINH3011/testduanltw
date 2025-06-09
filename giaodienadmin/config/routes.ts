@@ -105,27 +105,7 @@ export default [
     path: '/borrow-records',
     name: 'borrow-records',
     icon: 'history',
-    routes: [
-      {
-        path: '/borrow-records',
-        redirect: '/borrow-records/active',
-      },
-      {
-        path: '/borrow-records/active',
-        name: 'active',
-        component: './BorrowRecords/Active',
-      },
-      {
-        path: '/borrow-records/overdue',
-        name: 'overdue',
-        component: './BorrowRecords/Overdue',
-      },
-      {
-        path: '/borrow-records/returned',
-        name: 'returned',
-        component: './BorrowRecords/Returned',
-      },
-    ],
+    component: './BorrowRecords',
   },
   {
     path: '/statistics',

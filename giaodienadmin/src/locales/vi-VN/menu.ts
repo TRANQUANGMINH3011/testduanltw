@@ -13,4 +13,5 @@ export default {
   'menu.borrow-requests.pending': 'Chờ duyệt',
   'menu.borrow-requests.approved': 'Đã duyệt',
   'menu.borrow-requests.rejected': 'Bị từ chối',
+  'menu.borrow-records': 'Quản lý bản ghi mượn trả',
 };
