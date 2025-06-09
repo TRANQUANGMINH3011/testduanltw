@@ -9,4 +9,8 @@ export default {
 	'menu.DanhMuc': 'Danh mục',
 	'menu.DanhMuc.ChucVu': 'Chức vụ',
   'menu.device-management': 'Quản lý thiết bị',
+  'menu.borrow-requests': 'Quản lý yêu cầu mượn',
+  'menu.borrow-requests.pending': 'Chờ duyệt',
+  'menu.borrow-requests.approved': 'Đã duyệt',
+  'menu.borrow-requests.rejected': 'Bị từ chối',
 };
