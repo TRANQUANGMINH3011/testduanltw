@@ -1,0 +1,170 @@
+.navbar {
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+
+  &__container {
+    max-width: 1200px;
+    margin: -1 auto;
+    padding: 0 1rem;
+    height: 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  &__logo-icon {
+    width: 2rem;
+    height: 2rem;
+    background-color: #e6370b;
+    color: white;
+    font-weight: bold;
+    font-size: 0.875rem;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__logo-text {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+  }
+
+  &__menu {
+    display: none;
+
+    @media (min-width: 768px) {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+
+      a {
+        color: #33423b;
+        font-weight: 500;
+        text-decoration: none;
+
+        &:hover {
+          color: #ff3806;
+        }
+      }
+    }
+  }
+
+  &__login-btn , &__signup-btn {
+    background-color:#e6370b;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: #941010;
+    }
+  }
+
+  &__mobile-toggle {
+    display: block;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    background: none;
+    border: none;
+
+    @media (min-width: 768px) {
+      display: none;
+    }
+
+    &:hover {
+      background-color: #f3f4f6;
+    }
+  }
+
+  &__icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    color: #e6370b;
+  }
+
+  &__mobile-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    display: flex;
+  }
+
+  &__mobile-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.25);
+  }
+
+  &__mobile-menu {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 20rem;
+    height: 100%;
+    background-color: white;
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 50;
+    padding: 1.5rem;
+  }
+
+  &__mobile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+
+  &__mobile-close {
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+
+    &:hover {
+      background-color: #f3f4f6;
+    }
+  }
+
+  &__mobile-links {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+
+    a {
+      font-size: 1.125rem;
+      font-weight: 500;
+      color: #111827;
+      text-decoration: none;
+
+      &:hover {
+        color: #2563eb;
+      }
+    }
+  }
+
+  &__mobile-login-btn , &__mobile-signup-btn {
+    background-color: #e6370b;
+    color: white;
+    padding: 0.75rem;
+    font-size: 1.125rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: #941010;
+    }
+  }
+}

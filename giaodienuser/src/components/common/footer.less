@@ -1,0 +1,112 @@
+.footer {
+  background: linear-gradient(to bottom right, #ff6464, #dd190b, #bb3d3d);
+  color: white;
+  padding: 3rem 0;
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.grid {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: 1fr;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.logoSection {
+  grid-column: span 1;
+
+  @media (min-width: 768px) {
+    grid-column: span 2;
+  }
+}
+
+.logoRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.logoCircle {
+  width: 2rem;
+  height: 2rem;
+  background-color: #ffa3a3;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoText {
+  color: white;
+  font-weight: bold;
+  font-size: 0.875rem;
+}
+
+.logoTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.description {
+  color: #ffffff;
+  margin-bottom: 1rem;
+  max-width: 28rem;
+}
+
+.socials {
+  display: flex;
+  gap: 1rem;
+}
+
+.socialLink {
+  color: #ffffff;
+  transition: color 0.3s;
+
+  &:hover {
+    color: rgb(214, 224, 224);
+  }
+}
+
+.icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.heading {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color:#ffffff;
+}
+
+.links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  a {
+    color: #ffffff;
+    transition: color 0.3s;
+
+    &:hover {
+      color: rgb(219, 207, 207);
+    }
+  }
+}
+
+.copyright {
+  border-top: 1px solid #1f2936;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  text-align: center;
+  color: #ffffff;
+}

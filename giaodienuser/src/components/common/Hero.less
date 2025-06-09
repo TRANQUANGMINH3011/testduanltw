@@ -1,0 +1,112 @@
+.hero {
+  background: linear-gradient(to bottom right, #ff6464, #dd190b, #bb3d3d);
+  color: white;
+  padding: 5rem 0;
+  padding: 3rem 0 3rem;
+
+  @media (min-width: 1024px) {
+    padding: 4rem 0 4rem; //desktop: top = 4rem, bottom vẫn giữ 7rem
+  }
+
+  &__container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  &__grid {
+    margin-top: -2rem;
+    display: grid;
+    gap: 3rem;
+    align-items: center;
+    //chỉnh cho nó sát lên trên 1 tý đi
+
+
+    @media (min-width: 1024px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  &__title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #134440;
+
+    @media (min-width: 768px) {
+      font-size: 3rem;
+    }
+
+    @media (min-width: 1024px) {
+      font-size: 3.75rem;
+    }
+  }
+
+  &__subtitle {
+    font-size: 1.25rem;
+    color: #dbeafe;
+    line-height: 1.6;
+
+    @media (min-width: 768px) {
+      font-size: 1.5rem;
+    }
+  }
+
+  &__buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    @media (min-width: 640px) {
+      flex-direction: row;
+    }
+  }
+
+  &__btn-start , &__btn-learn {
+    background-color: white;
+    color: #e02f2f;
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: #991403;
+        color: white;
+    }
+  }
+
+  &__image-wrapper {
+    order: -1;
+
+    @media (min-width: 1024px) {
+      order: 1;
+    }
+  }
+
+  &__image-container {
+    position: relative;
+  }
+
+  &__image {
+    width: 100%;
+    height: 150%;
+    border-radius: 0.75rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  }
+
+  &__image-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(30, 64, 175, 0.2);
+    border-radius: 0.75rem;
+  }
+}
