@@ -1,120 +1,121 @@
-import { useState, useEffect } from 'react';
-import { Card, DatePicker, Row, Col, Statistic, Spin } from 'antd';
-import ColumnChart from '@/components/Chart/ColumnChart';
-import { getThongKeMuonTheoThang, getThongKeTongQuan } from '@/services/ThongKe';
-import moment from 'moment';
-import { TeamOutlined, ToolOutlined, SyncOutlined, BellOutlined } from '@ant-design/icons';
-import { PageContainer } from '@ant-design/pro-layout';
 
-const { MonthPicker } = DatePicker;
+import React from 'react';
+import { Card, Row, Col, Statistic, Table, Tag } from 'antd';
+import { ToolOutlined, HistoryOutlined, CheckCircleOutlined, ClockCircleOutlined } from '@ant-design/icons';
 
-type ChartPropsType = {
-  xAxis: string[];
-  yAxis: number[][];
-  yLabel: string[];
+const Dashboard: React.FC = () => {
+	const stats = [
+		{
+			title: 'Tổng thiết bị',
+			value: 156,
+			icon: <ToolOutlined style={{ color: '#1890ff' }} />,
+		},
+		{
+			title: 'Đang mượn',
+			value: 23,
+			icon: <ClockCircleOutlined style={{ color: '#faad14' }} />,
+		},
+		{
+			title: 'Đã trả',
+			value: 89,
+			icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
+		},
+		{
+			title: 'Yêu cầu chờ',
+			value: 12,
+			icon: <HistoryOutlined style={{ color: '#f5222d' }} />,
+		},
+	];
+
+	const recentRequests = [
+		{
+			key: '1',
+			user: 'Nguyễn Văn A',
+			device: 'Laptop Dell',
+			status: 'pending',
+			date: '2024-01-15',
+		},
+		{
+			key: '2',
+			user: 'Trần Thị B',
+			device: 'Máy chiếu',
+			status: 'approved',
+			date: '2024-01-14',
+		},
+		{
+			key: '3',
+			user: 'Lê Văn C',
+			device: 'Camera',
+			status: 'returned',
+			date: '2024-01-13',
+		},
+	];
+
+	const columns = [
+		{
+			title: 'Người dùng',
+			dataIndex: 'user',
+			key: 'user',
+		},
+		{
+			title: 'Thiết bị',
+			dataIndex: 'device',
+			key: 'device',
+		},
+		{
+			title: 'Trạng thái',
+			dataIndex: 'status',
+			key: 'status',
+			render: (status: string) => {
+				const colorMap = {
+					pending: 'orange',
+					approved: 'blue',
+					returned: 'green',
+				};
+				const textMap = {
+					pending: 'Chờ duyệt',
+					approved: 'Đã duyệt',
+					returned: 'Đã trả',
+				};
+				return <Tag color={colorMap[status as keyof typeof colorMap]}>{textMap[status as keyof typeof textMap]}</Tag>;
+			},
+		},
+		{
+			title: 'Ngày',
+			dataIndex: 'date',
+			key: 'date',
+		},
+	];
+
+	return (
+		<div>
+			<h1>Dashboard</h1>
+			
+			<Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+				{stats.map((stat, index) => (
+					<Col xs={24} sm={12} lg={6} key={index}>
+						<Card>
+							<Statistic
+								title={stat.title}
+								value={stat.value}
+								prefix={stat.icon}
+								valueStyle={{ color: '#3f8600' }}
+							/>
+						</Card>
+					</Col>
+				))}
+			</Row>
+
+			<Card title="Yêu cầu gần đây">
+				<Table
+					columns={columns}
+					dataSource={recentRequests}
+					pagination={false}
+					size="small"
+				/>
+			</Card>
+		</div>
+	);
 };
 
-const DashboardPage = () => {
-  const [chartProps, setChartProps] = useState<ChartPropsType>({
-    xAxis: [],
-    yAxis: [],
-    yLabel: [],
-  });
-
-  const [statsData, setStatsData] = useState({ totalEquipments: 0, borrowedEquipments: 0, pendingRequests: 0 });
-  const [month, setMonth] = useState(moment());
-  const [loadingChart, setLoadingChart] = useState(false);
-  const [loadingStats, setLoadingStats] = useState(false);
-
-  useEffect(() => {
-    const fetchStats = async () => {
-        setLoadingStats(true);
-        try {
-          const res = await getThongKeTongQuan();
-          setStatsData(res);
-        } catch (error) {
-          console.error("Failed to fetch stats data:", error);
-        } finally {
-          setLoadingStats(false);
-        }
-    }
-    fetchStats();
-  }, []);
-
-  useEffect(() => {
-    const fetchChartData = async () => {
-      setLoadingChart(true);
-      try {
-        const response = await getThongKeMuonTheoThang({ month: month.format('YYYY-MM') });
-        
-        const xAxisData = response.data.map(item => item.tenThietBi);
-        const yAxisData = [response.data.map(item => item.soLanMuon)];
-        const yLabelData = ['Số lần mượn'];
-
-        setChartProps({
-          xAxis: xAxisData,
-          yAxis: yAxisData,
-          yLabel: yLabelData,
-        });
-
-      } catch(error) {
-        console.error("Failed to fetch chart data:", error);
-        setChartProps({ xAxis: [], yAxis: [], yLabel: [] });
-      } finally {
-        setLoadingChart(false);
-      }
-    };
-    fetchChartData();
-  }, [month]);
-
-  const totalBorrowsInMonth = (chartProps.yAxis[0] || []).reduce((acc, val) => acc + val, 0);
-
-  return (
-    <PageContainer>
-        <Spin spinning={loadingStats}>
-            {/* SỬA Ở ĐÂY: Hiển thị đầy đủ 4 thẻ thống kê */}
-            <Row gutter={16} style={{ marginBottom: 24 }}>
-                <Col span={6}>
-                  <Card>
-                      <Statistic title="Tổng số thiết bị" value={statsData.totalEquipments} prefix={<ToolOutlined />} />
-                  </Card>
-                </Col>
-                <Col span={6}>
-                  <Card>
-                      <Statistic title="Đang cho mượn" value={statsData.borrowedEquipments} valueStyle={{ color: '#cf1322' }} prefix={<SyncOutlined />} />
-                  </Card>
-                </Col>
-                <Col span={6}>
-                  <Card>
-                      <Statistic title="Yêu cầu chờ duyệt" value={statsData.pendingRequests} valueStyle={{ color: '#faad14' }} prefix={<BellOutlined />} />
-                  </Card>
-                </Col>
-                <Col span={6}>
-                  <Card>
-                      <Statistic title="Lượt mượn trong tháng" value={totalBorrowsInMonth} prefix={<TeamOutlined />} />
-                  </Card>
-                </Col>
-            </Row>
-      </Spin>
-      <Card>
-        <MonthPicker
-          value={month}
-          onChange={(date) => setMonth(date || moment())}
-          placeholder="Chọn tháng"
-          style={{ marginBottom: 16 }}
-        />
-        <Spin spinning={loadingChart}>
-            <ColumnChart
-                height={350}
-                title="Thống kê thiết bị được mượn nhiều nhất"
-                xAxis={chartProps.xAxis}
-                yAxis={chartProps.yAxis}
-                yLabel={chartProps.yLabel}
-            />
-        </Spin>
-      </Card>
-    </PageContainer>
-  );
-};
-
-export default DashboardPage;
+export default Dashboard;

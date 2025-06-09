@@ -1,4 +1,4 @@
-﻿export default [
+export default [
 	{
 		path: '/user',
 		layout: false,
@@ -16,109 +16,66 @@
 		],
 	},
 
-	///////////////////////////////////
-	// DEFAULT MENU
-	{
-		path: '/dashboard',
-		name: 'Dashboard',
-		component: './TrangChu',
-		icon: 'HomeOutlined',
-	},
-	{
-		path: '/gioi-thieu',
-		name: 'About',
-		component: './TienIch/GioiThieu',
-		hideInMenu: true,
-	},
-	{
-		path: '/random-user',
-		name: 'RandomUser',
-		component: './RandomUser',
-		icon: 'ArrowsAltOutlined',
-	},
-
-	// DANH MUC HE THONG
-	// {
-	// 	name: 'DanhMuc',
-	// 	path: '/danh-muc',
-	// 	icon: 'copy',
-	// 	routes: [
-	// 		{
-	// 			name: 'ChucVu',
-	// 			path: 'chuc-vu',
-	// 			component: './DanhMuc/ChucVu',
-	// 		},
-	// 	],
-	// },
-
-	{
-		path: '/notification',
-		routes: [
-			{
-				path: './subscribe',
-				exact: true,
-				component: './ThongBao/Subscribe',
-			},
-			{
-				path: './check',
-				exact: true,
-				component: './ThongBao/Check',
-			},
-			{
-				path: './',
-				exact: true,
-				component: './ThongBao/NotifOneSignal',
-			},
-		],
-		layout: false,
-		hideInMenu: true,
-	},
-	{
-  path: '/admin',
-  name: 'Quản lý cho mượn',
-  icon: 'crown',
-  access: 'canAdmin', // Chỉ tàik khoản có quyền admin mới thấy menu này
-  routes: [
-    {
-      path: '/admin/dashboard',
-      name: 'Thống kê',
-      icon: 'areaChart',
-      component: './Admin/Dashboard',
-    },
-    {
-      path: '/admin/equipments',
-      name: 'Quản lý thiết bị',
-      icon: 'database',
-      component: './Admin/Equipments',
-    },
-    {
-      path: '/admin/requests',
-      name: 'Yêu cầu mượn',
-      icon: 'solution',
-      component: './Admin/Requests',
-    },
-     {
-      path: '/admin/borrows',
-      name: 'Ghi nhận mượn-trả',
-      icon: 'sync',
-      component: './Admin/Borrows',
-    },
-  ],
-},
+	// Main dashboard with custom layout
 	{
 		path: '/',
+		component: '@/layouts/BasicLayout',
+		routes: [
+			{
+				path: '/dashboard',
+				name: 'Dashboard',
+				component: './Admin/Dashboard',
+				icon: 'DashboardOutlined',
+			},
+			{
+				path: '/admin/equipments',
+				name: 'Quản lý thiết bị',
+				component: './Admin/Equipments',
+				icon: 'ToolOutlined',
+			},
+			{
+				path: '/admin/requests',
+				name: 'Quản lý yêu cầu',
+				component: './Admin/Requests',
+				icon: 'HistoryOutlined',
+			},
+			{
+				path: '/admin/borrows',
+				name: 'Quản lý mượn trả',
+				component: './Admin/Borrows',
+				icon: 'BarChartOutlined',
+			},
+			{
+				path: '/profile',
+				name: 'Thông tin cá nhân',
+				component: './user/Profile',
+				hideInMenu: true,
+			},
+			{
+				path: '/',
+				redirect: '/dashboard',
+			},
+		],
 	},
+
+	// Error pages
 	{
 		path: '/403',
-		component: './exception/403/403Page',
+		component: './exception/403',
 		layout: false,
 	},
 	{
-		path: '/hold-on',
-		component: './exception/DangCapNhat',
+		path: '/404',
+		component: './exception/404',
+		layout: false,
+	},
+	{
+		path: '/500',
+		component: './exception/500',
 		layout: false,
 	},
 	{
 		component: './exception/404',
+		layout: false,
 	},
 ];
