@@ -1,92 +1,63 @@
-
-import axios from '@/utils/axios';
+import { request } from '@/utils/request';
 
 export interface Device {
-  id: string;
+  _id: string;
   name: string;
-  serialNumber: string;
+  code: string;
   category: string;
-  status: 'available' | 'borrowed' | 'maintenance' | 'broken' | 'lost';
-  location: string;
   description?: string;
-  quantity: number;
-  imageUrl?: string;
+  status: 'available' | 'borrowed' | 'maintenance' | 'broken';
+  location?: string;
+  specifications?: any;
+  purchaseDate?: string;
+  warrantyExpiry?: string;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface DeviceListParams {
+export interface DeviceParams {
   current?: number;
   pageSize?: number;
-  keyword?: string;
+  name?: string;
+  category?: string;
+  status?: string;
 }
 
-export interface DeviceListResponse {
+export interface DeviceResponse {
   data: Device[];
-  current: number;
-  pageSize: number;
   total: number;
+  success: boolean;
 }
 
-export interface CreateDeviceRequest {
-  name: string;
-  serialNumber: string;
-  category: string;
-  location: string;
-  description?: string;
-  quantity: number;
-  imageUrl?: string;
-}
-
-export interface UpdateDeviceRequest extends Partial<CreateDeviceRequest> {
-  status?: Device['status'];
-}
-
-// Lấy danh sách thiết bị (admin có thể xem tất cả)
-export const getDevices = async (params: DeviceListParams = {}): Promise<DeviceListResponse> => {
-  const response = await axios.get('/admin/devices', { params });
-  return {
-    data: Array.isArray(response.data) ? response.data : [],
-    current: params.current || 1,
-    pageSize: params.pageSize || 10,
-    total: Array.isArray(response.data) ? response.data.length : 0,
-  };
+export const getDevices = async (params?: DeviceParams): Promise<DeviceResponse> => {
+  return request('/admin/devices', {
+    method: 'GET',
+    params,
+  });
 };
 
-// Lấy chi tiết thiết bị theo ID
 export const getDeviceById = async (id: string): Promise<Device> => {
-  const response = await axios.get(`/admin/devices/${id}`);
-  return response.data;
+  return request(`/admin/devices/${id}`, {
+    method: 'GET',
+  });
 };
 
-// Tạo thiết bị mới
-export const createDevice = async (device: CreateDeviceRequest): Promise<Device> => {
-  const response = await axios.post('/admin/devices', device);
-  return response.data;
+export const createDevice = async (device: Partial<Device>): Promise<Device> => {
+  return request('/admin/devices', {
+    method: 'POST',
+    data: device,
+  });
 };
 
-// Cập nhật thiết bị
-export const updateDevice = async (id: string, device: UpdateDeviceRequest): Promise<Device> => {
-  const response = await axios.put(`/admin/devices/${id}`, device);
-  return response.data;
+export const updateDevice = async (id: string, device: Partial<Device>): Promise<Device> => {
+  return request(`/admin/devices/${id}`, {
+    method: 'PUT',
+    data: device,
+  });
 };
 
-// Xóa thiết bị
 export const deleteDevice = async (id: string): Promise<void> => {
-  await axios.delete(`/admin/devices/${id}`);
-};
-
-// Thống kê thiết bị
-export interface DeviceStatistics {
-  total: number;
-  available: number;
-  borrowed: number;
-  maintenance: number;
-  broken: number;
-  lost: number;
-}
-
-export const getDeviceStatistics = async (): Promise<DeviceStatistics> => {
-  const response = await axios.get('/admin/devices/statistics');
-  return response.data;
+  return request(`/admin/devices/${id}`, {
+    method: 'DELETE',
+  });
 };

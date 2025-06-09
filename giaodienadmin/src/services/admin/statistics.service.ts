@@ -1,5 +1,5 @@
 
-import axios from '@/utils/axios';
+import { request } from '@/utils/request';
 
 export interface AdminOverviewStatistics {
   totalDevices: number;
@@ -70,27 +70,23 @@ export interface MonthlyStatistics {
   newUsers: number;
 }
 
+// Sử dụng đúng endpoints từ backend
 export const getAdminOverviewStatistics = async (): Promise<AdminOverviewStatistics> => {
-  const response = await axios.get('/admin/statistics/overview');
-  return response.data;
+  return request('/admin/statistics/overview', { method: 'GET' });
 };
 
 export const getTopBorrowedDevices = async (limit: number = 10): Promise<TopBorrowedDevice[]> => {
-  const response = await axios.get(`/admin/stats/top-borrowed?limit=${limit}`);
-  return response.data;
+  return request(`/admin/stats/top-borrowed?limit=${limit}`, { method: 'GET' });
 };
 
 export const getOverdueDevices = async (): Promise<OverdueDevice[]> => {
-  const response = await axios.get('/admin/stats/overdue');
-  return response.data;
+  return request('/admin/stats/overdue', { method: 'GET' });
 };
 
 export const getDueSoonDevices = async (): Promise<DueSoonDevice[]> => {
-  const response = await axios.get('/admin/stats/due-soon');
-  return response.data;
+  return request('/admin/stats/due-soon', { method: 'GET' });
 };
 
 export const getMonthlyStatistics = async (months: number = 12): Promise<MonthlyStatistics[]> => {
-  const response = await axios.get(`/admin/statistics/monthly?months=${months}`);
-  return response.data;
+  return request(`/admin/statistics/monthly?months=${months}`, { method: 'GET' });
 };

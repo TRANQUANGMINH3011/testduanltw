@@ -80,3 +80,61 @@ request.interceptors.request.use((url, options) => {
 });
 
 export default request;
+import { extend } from 'umi-request';
+import { notification } from 'antd';
+
+const request = extend({
+  prefix: 'http://localhost:3456', // URL backend
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Request interceptor
+request.interceptors.request.use((url, options) => {
+  const token = localStorage.getItem('admin-token');
+  if (token) {
+    const headers = {
+      ...options.headers,
+      Authorization: `Bearer ${token}`,
+    };
+    return {
+      url,
+      options: { ...options, headers },
+    };
+  }
+  return { url, options };
+});
+
+// Response interceptor
+request.interceptors.response.use(
+  async (response) => {
+    if (response.status === 200) {
+      return response;
+    }
+    throw response;
+  },
+  { global: false }
+);
+
+request.interceptors.response.use(
+  (response, options) => {
+    return response;
+  },
+  (error, options) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('admin-token');
+      window.location.href = '/user/login';
+    }
+    
+    notification.error({
+      message: 'Lỗi API',
+      description: error.message || 'Có lỗi xảy ra khi kết nối với server',
+    });
+    
+    throw error;
+  }
+);
+
+export { request };

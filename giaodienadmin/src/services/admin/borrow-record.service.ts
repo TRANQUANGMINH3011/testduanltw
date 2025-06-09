@@ -1,119 +1,56 @@
-
 import { request } from '@/utils/request';
 
 export interface BorrowRecord {
   _id: string;
-  borrowRequestId: string;
-  userId: string;
-  deviceId: string;
+  userId: {
+    _id: string;
+    fullName: string;
+    email: string;
+  };
+  deviceId: {
+    _id: string;
+    name: string;
+    code: string;
+  };
   borrowDate: string;
-  returnDate: string;
+  expectedReturnDate: string;
   actualReturnDate?: string;
   status: 'borrowed' | 'returned' | 'overdue';
-  note: string;
+  borrowNote?: string;
+  returnNote?: string;
   createdAt: string;
   updatedAt: string;
-  borrowRequest: {
-    _id: string;
-    purpose: string;
-    note: string;
-  };
-  user: {
-    _id: string;
-    name: string;
-    email: string;
-    phone?: string;
-    studentId?: string;
-  };
-  device: {
-    _id: string;
-    name: string;
-    serialNumber: string;
-    category: string;
-    imageUrl?: string;
-  };
 }
 
 export interface BorrowRecordParams {
   current?: number;
   pageSize?: number;
   status?: string;
-  keyword?: string;
-  userId?: string;
-  deviceId?: string;
-  startDate?: string;
-  endDate?: string;
-  overdue?: boolean;
-  sortField?: string;
-  sortOrder?: 'ascend' | 'descend';
 }
 
 export interface BorrowRecordResponse {
   data: BorrowRecord[];
   total: number;
-  current: number;
-  pageSize: number;
+  success: boolean;
 }
 
-export interface BorrowRecordStatistics {
-  totalBorrowed: number;
-  totalReturned: number;
-  totalOverdue: number;
-  dueSoon: number;
-}
-
-// Lấy tất cả bản ghi mượn trả
-export const getAllBorrowRecords = async (params?: BorrowRecordParams): Promise<BorrowRecordResponse> => {
-  const response = await request('/admin/borrow-records', {
+export const getBorrowRecords = async (params?: BorrowRecordParams): Promise<BorrowRecordResponse> => {
+  return request('/admin/borrow-records', {
     method: 'GET',
     params,
   });
-  return response.data;
 };
 
-// Lấy chi tiết bản ghi mượn trả
-export const getBorrowRecordById = async (id: string): Promise<BorrowRecord> => {
-  const response = await request(`/admin/borrow-records/${id}`, {
-    method: 'GET',
-  });
-  return response.data;
-};
-
-// Xác nhận trả thiết bị
-export const confirmReturnDevice = async (id: string): Promise<void> => {
-  await request(`/admin/borrow-records/${id}/return`, {
+export const confirmReturn = async (id: string, returnNote?: string): Promise<BorrowRecord> => {
+  return request(`/admin/borrow-records/${id}/return`, {
     method: 'PATCH',
+    data: { returnNote },
   });
 };
 
-// Lấy thống kê bản ghi mượn trả
-export const getBorrowRecordStatistics = async (): Promise<BorrowRecordStatistics> => {
-  const response = await request('/admin/borrow-records/statistics', {
+export const getOverdueRecords = async (): Promise<BorrowRecordResponse> => {
+  return request('/admin/borrow-records/overdue', {
     method: 'GET',
   });
-  return response.data;
 };
-
-// Lấy danh sách thiết bị quá hạn
-export const getOverdueBorrowRecords = async (params?: BorrowRecordParams): Promise<BorrowRecordResponse> => {
-  const response = await request('/admin/borrow-records/overdue', {
-    method: 'GET',
-    params,
-  });
-  return response.data;
-};
-
-// Lấy danh sách thiết bị sắp đến hạn
-export const getDueSoonBorrowRecords = async (days: number = 3): Promise<BorrowRecordResponse> => {
-  const response = await request(`/admin/borrow-records/due-soon?days=${days}`, {
-    method: 'GET',
-  });
-  return response.data;
-};
-
-// Gửi email nhắc nhở
-export const sendReminderEmail = async (id: string): Promise<void> => {
-  await request(`/admin/borrow-records/${id}/send-reminder`, {
-    method: 'POST',
-  });
-};
+`
